@@ -158,3 +158,22 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=100, interval=100, blit=True)
 plt.close(fig) # Prevent the static plot from showing
 HTML(ani.to_jshtml())
+
+## Visualization animation (by excitation level)
+
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from IPython.display import HTML
+
+fig, ax = plt.subplots()
+im = ax.imshow(cells[:,:,1], cmap='gray', vmin=0, vmax=1) # Changed to index 1 for excitation, and colormap to 'gray'
+plt.title('Excitation Levels of Sensorimotor Lenia') # Add a title for clarity
+
+def update(frame):
+    step()
+    im.set_data(cells[:,:,1]) # Update to display excitation levels
+    return im,
+
+ani = animation.FuncAnimation(fig, update, frames=100, interval=100, blit=True)
+plt.close(fig) # Prevent the static plot from showing
+HTML(ani.to_jshtml())
