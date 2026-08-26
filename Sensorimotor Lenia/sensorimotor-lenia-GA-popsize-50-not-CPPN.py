@@ -148,3 +148,147 @@ plt.xlabel('Generation')
 plt.ylabel('Average Score')
 plt.grid(True)
 plt.show()
+
+final_genomes = np.array([agent['genome'] for agent in agents])
+
+genome_labels = [
+    'Bias Right (Genome[0])',
+    'Bias Up (Genome[1])',
+    'Sensitivity to Neighbors (Genome[2])',
+    'Decay Factor (Genome[3])',
+    'Exploration Noise (Genome[4])'
+]
+
+plt.figure(figsize=(15, 10))
+for i in range(GENOME_SIZE):
+    plt.subplot(2, 3, i + 1)
+    plt.hist(final_genomes[:, i], bins=15, edgecolor='black', alpha=0.7)
+    plt.title(genome_labels[i])
+    plt.xlabel('Value')
+    plt.ylabel('Frequency')
+    plt.grid(axis='y', alpha=0.75)
+
+plt.tight_layout()
+plt.suptitle('Distribution of Final Agent Genome Components', y=1.02, fontsize=16)
+plt.show()
+
+plt.figure(figsize=(8, 8))
+
+# Create an empty grid for visualization
+vis_grid = np.zeros((GRID_SIZE, GRID_SIZE))
+
+# Plot the goal area
+plt.axvline(x=GOAL_X + 0.5, color='green', linestyle='--', label=f'Goal (x > {GOAL_X})')
+
+# Plot each agent's final position
+for agent in agents:
+    x, y = agent['pos']
+    vis_grid[y, x] = 1 # Mark agent presence
+    plt.scatter(x, y, color='blue', s=100, alpha=0.7, edgecolors='black')
+
+plt.imshow(vis_grid, cmap='viridis', origin='lower', extent=[0, GRID_SIZE, 0, GRID_SIZE], alpha=0.5)
+
+plt.title('Final Agent Distribution on Grid')
+plt.xlabel('X-coordinate')
+plt.ylabel('Y-coordinate')
+plt.xticks(np.arange(0, GRID_SIZE + 1, 2))
+plt.yticks(np.arange(0, GRID_SIZE + 1, 2))
+plt.grid(True)
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8, 8))
+plt.imshow(vis_grid, cmap='hot_r', origin='lower', extent=[0, GRID_SIZE, 0, GRID_SIZE])
+plt.title('Agent Density Heatmap')
+plt.xlabel('X-coordinate')
+plt.ylabel('Y-coordinate')
+plt.xticks(np.arange(0, GRID_SIZE + 1, 2))
+plt.yticks(np.arange(0, GRID_SIZE + 1, 2))
+plt.colorbar(label='Agent Presence (Normalized)')
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(10, 10))
+
+# Plot the density heatmap first
+plt.imshow(vis_grid, cmap='hot_r', origin='lower', extent=[0, GRID_SIZE, 0, GRID_SIZE], alpha=0.7)
+plt.colorbar(label='Agent Presence (Normalized)')
+
+# Overlay the goal area
+plt.axvline(x=GOAL_X + 0.5, color='lime', linestyle='--', linewidth=2, label=f'Goal (x > {GOAL_X})')
+
+# Overlay each agent's final position
+for agent in agents:
+    x, y = agent['pos']
+    plt.scatter(x + 0.5, y + 0.5, color='cyan', s=150, alpha=0.8, edgecolors='blue', marker='o') # Added 0.5 to center scatter points in heatmap cells
+
+plt.title('Agent Positions and Density Heatmap (Combined)')
+plt.xlabel('X-coordinate')
+plt.ylabel('Y-coordinate')
+plt.xticks(np.arange(0, GRID_SIZE + 1, 2))
+plt.yticks(np.arange(0, GRID_SIZE + 1, 2))
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.legend()
+plt.show()
+
+def plot_agent_distribution(agents, vis_grid, grid_size, goal_x,
+                            cmap_heatmap='hot_r', alpha_heatmap=0.7,
+                            scatter_color='cyan', scatter_size=150, scatter_alpha=0.8,
+                            goal_line_color='lime', goal_line_style='--', goal_line_width=2,
+                            title='Agent Positions and Density Heatmap (Combined)',
+                            figsize=(10, 10)):
+    """
+    Plots the agent positions overlaid on a density heatmap.
+
+    Args:
+        agents (list): List of agent dictionaries with 'pos' key.
+        vis_grid (np.array): 2D array representing agent presence/density.
+        grid_size (int): Size of the grid (GRID_SIZE).
+        goal_x (int): The x-coordinate defining the goal area (x > goal_x).
+        cmap_heatmap (str): Colormap for the heatmap.
+        alpha_heatmap (float): Alpha transparency for the heatmap.
+        scatter_color (str): Color for the agent scatter points.
+        scatter_size (int): Size of the agent scatter points.
+        scatter_alpha (float): Alpha transparency for the scatter points.
+        goal_line_color (str): Color for the goal line.
+        goal_line_style (str): Line style for the goal line.
+        goal_line_width (int): Line width for the goal line.
+        title (str): Title of the plot.
+        figsize (tuple): Figure size (width, height).
+    """
+    plt.figure(figsize=figsize)
+
+    # Plot the density heatmap first
+    plt.imshow(vis_grid, cmap=cmap_heatmap, origin='lower', extent=[0, grid_size, 0, grid_size], alpha=alpha_heatmap)
+    plt.colorbar(label='Agent Presence (Normalized)')
+
+    # Overlay the goal area
+    plt.axvline(x=goal_x + 0.5, color=goal_line_color, linestyle=goal_line_style, linewidth=goal_line_width, label=f'Goal (x > {goal_x})')
+
+    # Overlay each agent's final position
+    for agent in agents:
+        x, y = agent['pos']
+        plt.scatter(x + 0.5, y + 0.5, color=scatter_color, s=scatter_size, alpha=scatter_alpha, edgecolors='blue', marker='o')
+
+    plt.title(title)
+    plt.xlabel('X-coordinate')
+    plt.ylabel('Y-coordinate')
+    plt.xticks(np.arange(0, grid_size + 1, 2))
+    plt.yticks(np.arange(0, grid_size + 1, 2))
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.legend()
+    plt.show()
+
+# Example usage of the refactored function
+plot_agent_distribution(agents, vis_grid, GRID_SIZE, GOAL_X)
+
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 8))
+plt.imshow(cells[:,:,0], cmap='gray', vmin=0, vmax=1)
+plt.title('Current Alive Status Grid (Static)')
+plt.xlabel('X-coordinate')
+plt.ylabel('Y-coordinate')
+plt.colorbar(label='Alive Status (0=Dead, 1=Alive)')
+plt.grid(False)
+plt.show()
