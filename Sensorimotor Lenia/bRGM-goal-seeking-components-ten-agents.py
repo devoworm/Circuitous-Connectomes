@@ -355,3 +355,111 @@ def run_simulation_and_collect_components(num_agents, num_steps, arena_radius, a
             agent_data['pos'] = arena_boundaries(agent_data['pos'])
 
     return agents_data
+
+## Analyze the final positions of the agents
+
+num_agents_at_goal = 0
+distances_to_goal = []
+
+for agent in final_agents_states:
+    final_pos = agent['pos']
+    dist_to_goal = np.linalg.norm(final_pos - GOAL_POSITION)
+    distances_to_goal.append(dist_to_goal)
+
+    if dist_to_goal < GOAL_RADIUS + AGENT_RADIUS:
+        num_agents_at_goal += 1
+
+print(f"--- Multi-Agent Movement Analysis (Total Agents: {NUM_AGENTS}) ---")
+print(f"Number of agents that reached the goal: {num_agents_at_goal}")
+print(f"Percentage of agents that reached the goal: {num_agents_at_goal / NUM_AGENTS * 100:.2f}%")
+print(f"Average final distance to goal: {np.mean(distances_to_goal):.2f}")
+print(f"Minimum final distance to goal: {np.min(distances_to_goal):.2f}")
+print(f"Maximum final distance to goal: {np.max(distances_to_goal):.2f}")
+
+## Visualize final agent positions and their trajectories
+
+fig, ax = plt.subplots(figsize=(10, 10))
+
+# Draw arena and goal
+arena_patch = plt.Circle((0,0), ARENA_RADIUS, color='gray', fill=False, linewidth=2)
+ax.add_patch(arena_patch)
+goal_patch = plt.Circle(GOAL_POSITION, GOAL_RADIUS, color='green', fill=True, ec='black')
+ax.add_patch(goal_patch)
+ax.set_aspect('equal')
+ax.set_xlim(-ARENA_RADIUS-1, ARENA_RADIUS+1)
+ax.set_ylim(-ARENA_RADIUS-1, ARENA_RADIUS+1)
+ax.set_title("Final Agent Positions and Trajectories")
+
+# Plot each agent's trajectory and final position
+for i, agent in enumerate(final_agents_states):
+    trajectory = np.array(agent['trajectory'])
+    final_pos = agent['pos']
+
+    # Trajectory line
+    ax.plot(trajectory[:, 0], trajectory[:, 1], color=plt.cm.jet(i / NUM_AGENTS), linewidth=0.8, alpha=0.6)
+
+    # Final position marker
+    ax.scatter(final_pos[0], final_pos[1], color='red', s=50, edgecolors='black', zorder=5)
+
+plt.xlabel("X-position")
+plt.ylabel("Y-position")
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.show()
+
+import matplotlib.pyplot as plt
+from IPython.display import HTML, display
+
+## Call the main_multi_agent function defined in cell d1bb28bf
+print(f"Generating multi-agent simulation with {NUM_AGENTS} agents...")
+multi_agent_animation = main_multi_agent()
+
+## Display the animation
+print("Displaying multi-agent animation...")
+display(HTML(multi_agent_animation.to_jshtml()))
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+## Prepare data for plotting averages
+#W Initialize lists to store sums for averaging
+sum_primary_vel_x = np.zeros(NUM_STEPS)
+sum_primary_vel_y = np.zeros(NUM_STEPS)
+sum_brm_output_x = np.zeros(NUM_STEPS)
+sum_brm_output_y = np.zeros(NUM_STEPS)
+
+for agent_data in agents_component_data:
+    sum_primary_vel_x += np.array(agent_data['primary_vel_x_history'])
+    sum_primary_vel_y += np.array(agent_data['primary_vel_y_history'])
+    sum_brm_output_x += np.array(agent_data['brm_output_x_history'])
+    sum_brm_output_y += np.array(agent_data['brm_output_y_history'])
+
+## Calculate averages
+avg_primary_vel_x = sum_primary_vel_x / NUM_AGENTS
+avg_primary_vel_y = sum_primary_vel_y / NUM_AGENTS
+avg_brm_output_x = sum_brm_output_x / NUM_AGENTS
+avg_brm_output_y = sum_brm_output_y / NUM_AGENTS
+
+time_steps = np.arange(NUM_STEPS)
+
+## Plotting
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
+
+## Plot Average Primary Goal-Seeking Velocity Components
+ax1.plot(time_steps, avg_primary_vel_x, label='Avg Primary Vel X', color='red')
+ax1.plot(time_steps, avg_primary_vel_y, label='Avg Primary Vel Y', linestyle='--', color='red')
+ax1.set_ylabel('Velocity Component Value')
+ax1.set_title('Average Primary Goal-Seeking Velocity Components Across Agents')
+ax1.legend()
+ax1.grid(True)
+
+## Plot Average bRGM Output Contribution Components
+ax2.plot(time_steps, avg_brm_output_x, label='Avg bRGM Output X', color='blue')
+ax2.plot(time_steps, avg_brm_output_y, label='Avg bRGM Output Y', linestyle='--', color='blue')
+ax2.set_xlabel('Simulation Step')
+ax2.set_ylabel('Output Component Value')
+ax2.set_title('Average bRGM Output Contribution Components Across Agents')
+ax2.legend()
+ax2.grid(True)
+
+plt.tight_layout()
+plt.show()
