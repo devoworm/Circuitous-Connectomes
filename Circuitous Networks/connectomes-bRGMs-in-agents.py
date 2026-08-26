@@ -5,22 +5,22 @@ from pyvis.network import Network
 import random
 
 def create_temporal_connectome():
-    # Initialize a Directed Graph
+    ## Initialize a Directed Graph
     G = nx.DiGraph()
 
-    # Define temporal regions (total < 100 neurons)
+    ## Define temporal regions (total < 100 neurons)
     past_nodes = [f"Past_{i}" for i in range(15)]
     present_nodes = [f"Present_{i}" for i in range(20)]
     future_nodes = [f"Future_{i}" for i in range(15)]
     intermediate_nodes = [f"Circuitous_{i}" for i in range(30)] # Suboptimal redundancy
 
-    # Add nodes with temporal metadata
+    ## Add nodes with temporal metadata
     for node in past_nodes: G.add_node(node, group='Past', color='#FF9999', size=20)
     for node in present_nodes: G.add_node(node, group='Present', color='#99FF99', size=25)
     for node in future_nodes: G.add_node(node, group='Future', color='#9999FF', size=20)
     for node in intermediate_nodes: G.add_node(node, group='Intermediate', color='#CCCCCC', size=15)
 
-    # 1. Past to Present (Direct and Circuitous)
+    ## 1. Past to Present (Direct and Circuitous)
     for p in past_nodes:
         # Some direct feedforward
         G.add_edge(p, random.choice(present_nodes))
@@ -29,7 +29,7 @@ def create_temporal_connectome():
         G.add_edge(p, inter)
         G.add_edge(inter, random.choice(present_nodes))
 
-    # 2. Present to Future (Branching Alternate Futures)
+    ## 2. Present to Future (Branching Alternate Futures)
     for pr in present_nodes:
         G.add_edge(pr, random.choice(future_nodes))
         # Adding "spaghettification": convolved paths to future outcomes
@@ -39,7 +39,7 @@ def create_temporal_connectome():
         G.add_edge(inter1, inter2)
         G.add_edge(inter2, random.choice(future_nodes))
 
-    # 3. Feedback Loops (Circular temporal relations: Future -> Past)
+    ## 3. Feedback Loops (Circular temporal relations: Future -> Past)
     # This represents the "strange loop" where future predictions update past referents
     for f in future_nodes[:5]:
         G.add_edge(f, random.choice(past_nodes))
@@ -50,7 +50,7 @@ def create_temporal_connectome():
         if not G.has_edge(u, v):
             G.add_edge(u, v)
 
-    # Create Interactive Visualization
+    ## Create Interactive Visualization
     net = Network(height="750px", width="100%", bgcolor="#222222", font_color="white", directed=True)
     net.from_nx(G)
     # Customize physics settings for a more spread out and stable layout
@@ -81,3 +81,11 @@ def create_temporal_connectome():
 if __name__ == "__main__":
     G = create_temporal_connectome()
     print("Interactive connectome generated as 'temporal_connectome.html'.")
+
+## Calculate graph density
+density = nx.density(G)
+print(f"Graph Density: {density:.4f}")
+
+## Calculate average clustering coefficient
+clustering_coefficient = nx.average_clustering(G)
+print(f"Average Clustering Coefficient: {clustering_coefficient:.4f}")
